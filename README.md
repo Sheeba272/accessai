@@ -72,9 +72,6 @@ cp .env.example .env
 ```bash
 # From project root
 python main.py
-# or:
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
 
 ### 5. Open the frontend
 ```bash
