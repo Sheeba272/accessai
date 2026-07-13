@@ -4,12 +4,10 @@ Scan Service — orchestrates scanner + AI + database
 import uuid
 import json
 import logging
-import asyncio
 from datetime import datetime
 from pathlib import Path
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.utils.config import settings
 from backend.utils.database import ScanRecord, AsyncSessionLocal

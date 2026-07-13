@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy import Column, String, Integer, Float, Text, DateTime
+from sqlalchemy import Column, String, Float, Text, DateTime
 
 from backend.utils.config import settings
 

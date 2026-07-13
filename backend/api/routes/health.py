@@ -19,6 +19,6 @@ async def ollama_health():
             if r.status_code == 200:
                 models = [m["name"] for m in r.json().get("models", [])]
                 return {"status": "online", "models": models}
-    except Exception as e:
+    except Exception:
         pass
     return {"status": "offline", "models": [], "hint": "Run: ollama serve"}

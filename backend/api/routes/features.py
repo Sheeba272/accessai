@@ -3,12 +3,11 @@ AccessAI — Feature Routes (v2)
 Fixes: headless=False, cookie accept, faster scenarios (no DOM re-visit),
        better guideline validation with cookie handling, WCAG links for passed checks
 """
-import json
 import logging
 import asyncio
 import concurrent.futures
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Query
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -311,16 +310,13 @@ def _build_dom_context_from_scan(scan_data: dict) -> dict:
     No extra browser visit — uses violations + passed checks already collected.
     """
     violations    = scan_data.get("violations", [])
-    passed_checks = scan_data.get("passed_checks", [])
-    metrics       = scan_data.get("metrics", {})
     url           = scan_data.get("url", "")
 
     # Count interactive element types from violations
     image_issues    = sum(1 for v in violations if "image" in v.get("id","").lower() or "alt" in v.get("id","").lower())
     form_issues     = sum(1 for v in violations if "label" in v.get("id","").lower() or "form" in v.get("id","").lower())
     contrast_issues = sum(1 for v in violations if "contrast" in v.get("id","").lower())
-    aria_issues     = sum(1 for v in violations if "aria" in v.get("id","").lower())
-
+    
     # Infer page characteristics from URL
     path = url.lower()
     is_ecommerce = any(k in path for k in ["shop","store","product","cart","checkout"])

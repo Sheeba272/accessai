@@ -1,5 +1,6 @@
 import sys
 import asyncio
+import os
 
 # MUST be set before any uvicorn/fastapi imports on Windows
 if sys.platform == "win32":
@@ -13,7 +14,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 
 from backend.api.routes import scan, report, health, features
-from backend.utils.config import settings
 from backend.utils.database import init_db
 from backend.utils.logger import setup_logger
 
@@ -63,7 +63,7 @@ app.include_router(scan.router,   prefix="/api/scan",   tags=["scan"])
 app.include_router(report.router, prefix="/api/report", tags=["report"])
 app.include_router(features.router, prefix="/api", tags=["features"])
 
-import os
+
 os.makedirs("data/screenshots", exist_ok=True)
 os.makedirs("data/reports", exist_ok=True)
 app.mount("/data", StaticFiles(directory="data"), name="data")

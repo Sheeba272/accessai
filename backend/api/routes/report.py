@@ -4,10 +4,9 @@ GET /api/report/{scan_id}?format=html|json|pdf|docx&type=scan|vpat|acr
 """
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse
 
 from backend.services.scan_service import scan_service
 from backend.utils.config import settings

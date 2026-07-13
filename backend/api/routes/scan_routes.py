@@ -1,14 +1,13 @@
 """
 Scan API routes — updated with multi-screenshot support
 """
-import asyncio
 import logging
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse
 
 from backend.models.schemas import (
-    ScanRequest, ScanStartResponse, ScanStatusResponse, HistoryResponse
+    ScanRequest, ScanStartResponse, ScanStatusResponse
 )
 from backend.services.scan_service import scan_service
 from backend.utils.validators import validate_url, sanitize_url

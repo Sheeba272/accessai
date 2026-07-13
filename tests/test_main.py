@@ -3,7 +3,6 @@ AccessAI — Test Suite
 pytest + httpx AsyncClient
 """
 import pytest
-import json
 from unittest.mock import AsyncMock, patch
 from httpx import AsyncClient, ASGITransport
 
