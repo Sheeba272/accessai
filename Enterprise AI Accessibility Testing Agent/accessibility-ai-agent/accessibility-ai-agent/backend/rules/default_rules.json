@@ -1,0 +1,112 @@
+[
+  {
+    "id": "keyboard.focusable-controls",
+    "name": "Interactive controls are keyboard reachable",
+    "category": "keyboard navigation",
+    "wcag": ["2.1.1", "2.1.2", "2.4.3"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "keyboard.tab-order",
+    "name": "Tab order avoids positive tabindex",
+    "category": "tab order",
+    "wcag": ["2.4.3"],
+    "severity": "medium",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "focus.visible",
+    "name": "Focusable elements expose a visible focus indicator",
+    "category": "focus visibility",
+    "wcag": ["2.4.7"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "labels.accessible-names",
+    "name": "Controls and links have accessible names",
+    "category": "screen reader labels",
+    "wcag": ["1.3.1", "2.4.4", "3.3.2", "4.1.2"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "aria.valid-usage",
+    "name": "ARIA attributes are valid and not contradictory",
+    "category": "ARIA attributes",
+    "wcag": ["4.1.2"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "semantics.landmarks",
+    "name": "Page uses semantic structure and landmarks",
+    "category": "semantic HTML usage",
+    "wcag": ["1.3.1", "2.4.1"],
+    "severity": "medium",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "headings.hierarchy",
+    "name": "Heading hierarchy is logical",
+    "category": "heading hierarchy",
+    "wcag": ["1.3.1", "2.4.6"],
+    "severity": "medium",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "forms.labels-errors",
+    "name": "Forms have labels, instructions, and accessible errors",
+    "category": "form accessibility",
+    "wcag": ["1.3.1", "3.3.1", "3.3.2", "4.1.3"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "images.alt-text",
+    "name": "Informative images include alternate text",
+    "category": "image alt texts",
+    "wcag": ["1.1.1"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "contrast.text",
+    "name": "Text has sufficient color contrast",
+    "category": "color contrast",
+    "wcag": ["1.4.3", "1.4.11"],
+    "severity": "high",
+    "type": "axe_proxy",
+    "axe_rule_ids": ["color-contrast"],
+    "enabled": true
+  },
+  {
+    "id": "dialogs.accessible",
+    "name": "Modals and dialogs are named, modal, and focus managed",
+    "category": "modal/dialog accessibility",
+    "wcag": ["2.1.2", "2.4.3", "4.1.2"],
+    "severity": "critical",
+    "type": "builtin",
+    "enabled": true
+  },
+  {
+    "id": "errors.announced",
+    "name": "Error messages are programmatically associated and announced",
+    "category": "error messaging accessibility",
+    "wcag": ["3.3.1", "3.3.3", "4.1.3"],
+    "severity": "high",
+    "type": "builtin",
+    "enabled": true
+  }
+]
+

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AccessAI — Accessibility Testing Agent</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/dashboard.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body class="dark-theme" data-theme="dark">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">♿</div>
+      <span class="brand-name">AccessAI</span>
+      <span class="brand-tag">Enterprise</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-icon" id="themeToggle" title="Toggle theme">☀</button>
+      <span class="nav-model-label">Model:</span>
+      <select id="modelSelect" class="model-select">
+        <option value="llama3">llama3</option>
+        <option value="mistral">mistral</option>
+        <option value="phi3:mini">phi3:mini (fastest)</option>
+        <option value="deepseek-r1">deepseek-r1</option>
+        <option value="qwen2.5">qwen2.5</option>
+      </select>
+      <div class="status-dot" id="ollamaStatus" title="Ollama status"></div>
+    </div>
+  </nav>
+
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Scan Target</h3>
+        <div class="input-group">
+          <label class="input-label">Website URL</label>
+          <input type="url" id="urlInput" class="url-input" placeholder="https://example.com" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Scan Depth</label>
+          <select id="scanDepth" class="select-input">
+            <option value="1">Single page</option>
+            <option value="3">Up to 3 pages</option>
+            <option value="5">Up to 5 pages</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">WCAG Level</label>
+          <select id="wcagLevel" class="select-input">
+            <option value="AA">WCAG 2.1 AA (recommended)</option>
+            <option value="A">WCAG 2.1 A</option>
+            <option value="AAA">WCAG 2.1 AAA</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Additional Options</label>
+          <label class="toggle-row"><input type="checkbox" id="runGuidelines" checked /><span class="toggle-label">Run guideline validation</span></label>
+          <label class="toggle-row"><input type="checkbox" id="runScenarios" /><span class="toggle-label">Generate AI test scenarios</span></label>
+        </div>
+        <button class="btn-primary btn-full" id="startScanBtn"><span class="btn-icon-left">▶</span> Start AI Accessibility Scan</button>
+        <button class="btn-secondary btn-full" id="downloadReportBtn" style="display:none">⬇ Download HTML Report</button>
+        <button class="btn-secondary btn-full" id="downloadVpatBtn" style="display:none">📄 Download VPAT/ACR</button>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Filters</h3>
+        <div class="filter-group" id="severityFilters">
+          <div class="filter-label">Severity</div>
+          <label class="filter-chip active" data-filter="critical"><input type="checkbox" checked value="critical"> Critical</label>
+          <label class="filter-chip active" data-filter="high"><input type="checkbox" checked value="high"> High</label>
+          <label class="filter-chip active" data-filter="medium"><input type="checkbox" checked value="medium"> Medium</label>
+          <label class="filter-chip active" data-filter="low"><input type="checkbox" checked value="low"> Low</label>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">Scan History</h3>
+        <div id="scanHistory" class="history-list"><div class="history-empty">No previous scans</div></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- WELCOME -->
+      <div class="welcome-state" id="welcomeState">
+        <div class="welcome-icon">♿</div>
+        <h1 class="welcome-title">AI-Powered Accessibility Testing</h1>
+        <p class="welcome-sub">Enter a URL and start scanning for WCAG 2.1 violations.</p>
+        <div class="notice-box" style="margin:0 auto 24px;max-width:600px;text-align:left">
+          <div class="notice-icon">ℹ</div>
+          <div class="notice-body">
+            <strong>Automated scanning has limitations.</strong>
+            axe-core detects ~30–40% of WCAG issues. Some sites block headless browsers
+            (e.g. Primark, Amazon). Enable <em>Guideline Validation</em> and <em>AI Scenarios</em>
+            for deeper coverage. Manual testing is always recommended for full compliance.
+          </div>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card"><div class="feature-icon">🔍</div><div class="feature-title">axe-core Engine</div><div class="feature-desc">70+ WCAG 2.1 rules</div></div>
+          <div class="feature-card"><div class="feature-icon">✅</div><div class="feature-title">Guideline Validator</div><div class="feature-desc">24 custom rules for keyboard, focus, ARIA</div></div>
+          <div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Scenario Gen</div><div class="feature-desc">Test cases for 7 user groups</div></div>
+          <div class="feature-card"><div class="feature-icon">📋</div><div class="feature-title">VPAT / ACR Reports</div><div class="feature-desc">PDF, DOCX and HTML export</div></div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="scan-progress-state" id="scanProgressState" style="display:none">
+        <div class="progress-header"><div class="spinner"></div><h2 class="progress-title" id="progressTitle">Initializing scan...</h2></div>
+        <div class="progress-bar-wrapper"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+        <div class="progress-steps">
+          <div class="progress-step" id="step-browser"><div class="step-dot"></div><span>Launching browser</span></div>
+          <div class="progress-step" id="step-navigate"><div class="step-dot"></div><span>Navigating to URL</span></div>
+          <div class="progress-step" id="step-axe"><div class="step-dot"></div><span>Injecting axe-core</span></div>
+          <div class="progress-step" id="step-scan"><div class="step-dot"></div><span>Running accessibility scan</span></div>
+          <div class="progress-step" id="step-ai"><div class="step-dot"></div><span>AI analyzing violations</span></div>
+          <div class="progress-step" id="step-report"><div class="step-dot"></div><span>Generating report</span></div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="results-state" id="resultsState" style="display:none">
+        <div class="score-row">
+          <div class="score-card score-main">
+            <div class="score-circle">
+              <svg viewBox="0 0 100 100"><circle class="score-bg" cx="50" cy="50" r="42"/><circle class="score-ring" id="scoreRing" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"/></svg>
+              <div class="score-number" id="scoreNumber">--</div>
+            </div>
+            <div class="score-label">Axe Accessibility Score</div>
+            <div class="score-formula" id="scoreFormula"></div>
+            <div class="score-grade" id="scoreGrade">--</div>
+          </div>
+          <div class="metric-cards">
+            <div class="metric-card metric-critical"><div class="metric-value" id="metricCritical">0</div><div class="metric-label">Critical</div></div>
+            <div class="metric-card metric-high"><div class="metric-value" id="metricHigh">0</div><div class="metric-label">High</div></div>
+            <div class="metric-card metric-medium"><div class="metric-value" id="metricMedium">0</div><div class="metric-label">Medium</div></div>
+            <div class="metric-card metric-low"><div class="metric-value" id="metricLow">0</div><div class="metric-label">Low</div></div>
+            <div class="metric-card metric-passed" id="metricPassedCard" style="cursor:pointer" title="Click to understand what Passed means">
+              <div class="metric-value" id="metricPassed">0</div>
+              <div class="metric-label">Passed ℹ</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scan quality warning -->
+        <div class="notice-box" id="scanQualityNotice" style="display:none;margin-bottom:12px">
+          <div class="notice-icon">⚠</div>
+          <div class="notice-body" id="scanQualityText"></div>
+        </div>
+
+        <!-- 7 TABS -->
+        <div class="tab-bar">
+          <button class="tab active" data-tab="violations">Violations</button>
+          <button class="tab" data-tab="rule-evidence">Rule Evidence</button>
+          <button class="tab" data-tab="passed-checks">Passed Checks</button>
+          <button class="tab" data-tab="scenarios">Scenarios</button>
+          <button class="tab" data-tab="ai-analysis">AI Analysis</button>
+          <button class="tab" data-tab="screenshot">Screenshots</button>
+          <button class="tab" data-tab="executive">Executive Summary</button>
+        </div>
+
+        <!-- VIOLATIONS TAB -->
+        <div class="tab-panel active" id="tab-violations">
+          <div class="table-toolbar">
+            <input type="text" class="search-input" id="violationSearch" placeholder="Search violations...">
+            <span class="result-count" id="resultCount">0 issues</span>
+          </div>
+          <div class="violations-table-wrapper">
+            <table class="violations-table">
+              <thead><tr><th>Severity</th><th>Issue</th><th>WCAG</th><th>Affected</th><th>Actions</th></tr></thead>
+              <tbody id="violationsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RULE EVIDENCE TAB -->
+        <div class="tab-panel" id="tab-rule-evidence" style="display:none">
+          <p class="text-secondary" style="font-size:13px;margin-bottom:14px">
+            Results from the custom guideline validator — covers configured rules for keyboard navigation,
+            focus visibility, ARIA, semantic HTML, forms, modals and error messages that axe-core misses.
+          </p>
+          <div id="ruleEvidenceContent">
+            <div class="empty-state"><div class="empty-state-icon">⚙</div>Enable guideline validation in the sidebar and re-scan to see results here.</div>
+          </div>
+        </div>
+
+        <!-- PASSED CHECKS TAB (NEW) -->
+        <div class="tab-panel" id="tab-passed-checks" style="display:none">
+          <div class="notice-box" style="margin-bottom:16px">
+            <div class="notice-icon">ℹ</div>
+            <div class="notice-body">
+              <strong>What does "Passed" mean?</strong>
+              Each row is one axe-core <em>rule</em> that ran and found <em>no violations</em> on this page —
+              for example <code>image-alt: PASS</code> means all images had alt text.
+              A high count does <strong>not</strong> mean the site is fully accessible —
+              automated tools cover only ~30-40% of WCAG 2.1 criteria.
+              <a href="https://www.deque.com/axe/core-documentation/api-documentation/#results-object" target="_blank" style="color:var(--accent)">Learn more about axe-core results ↗</a> &nbsp;|&nbsp;
+              <a href="https://www.w3.org/WAI/test-evaluate/preliminary/" target="_blank" style="color:var(--accent)">W3C Manual Check Guide ↗</a>
+            </div>
+          </div>
+          <div id="passedChecksContent">
+            <div class="empty-state"><div class="empty-state-icon">✓</div>Run a scan to see passed checks.</div>
+          </div>
+        </div>
+
+        <!-- SCENARIOS TAB -->
+        <div class="tab-panel" id="tab-scenarios" style="display:none">
+          <div id="scenariosContent">
+            <div class="empty-state"><div class="empty-state-icon">🤖</div>Enable "Generate AI test scenarios" in the sidebar and re-scan.</div>
+          </div>
+        </div>
+
+        <!-- AI ANALYSIS TAB -->
+        <div class="tab-panel" id="tab-ai-analysis" style="display:none">
+          <div class="ai-analysis-list" id="aiAnalysisList"></div>
+        </div>
+
+        <!-- SCREENSHOTS TAB (multiple) -->
+        <div class="tab-panel" id="tab-screenshot" style="display:none">
+          <p class="text-secondary" style="font-size:13px;margin-bottom:14px">
+            Screenshots captured during the scan. The page is captured after JavaScript loads.
+            For multi-page scans, one screenshot per page is shown.
+          </p>
+          <div id="screenshotsGrid" class="screenshots-grid">
+            <div class="screenshot-placeholder-state" id="screenshotPlaceholder">No screenshot available</div>
+          </div>
+        </div>
+
+        <!-- EXECUTIVE SUMMARY TAB -->
+        <div class="tab-panel" id="tab-executive" style="display:none">
+          <div class="executive-summary" id="executiveSummary"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: Violation Detail -->
+  <div class="modal-overlay" id="violationModal" style="display:none">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title" id="modalTitle">Violation Detail</h2><button class="modal-close" id="modalClose">✕</button></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="scripts/api.js"></script>
+  <script src="scripts/ui.js"></script>
+  <script src="scripts/scanner.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+
+  # -----------------------------------------------
+  # AccessAI FastAPI Backend
+  # -----------------------------------------------
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: accessai-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../data:/app/data
+      - ../frontend:/app/frontend
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - BROWSER_HEADLESS=true
+      - DATABASE_URL=sqlite+aiosqlite:///./data/accessai.db
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    networks:
+      - accessai-net
+
+  # -----------------------------------------------
+  # Ollama — Local LLM Runtime
+  # -----------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: accessai-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - accessai-net
+    # Uncomment for GPU support:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # -----------------------------------------------
+  # Nginx — Serve frontend + reverse proxy
+  # -----------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: accessai-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - accessai-net
+
+volumes:
+  ollama-data:
+
+networks:
+  accessai-net:
+    driver: bridge

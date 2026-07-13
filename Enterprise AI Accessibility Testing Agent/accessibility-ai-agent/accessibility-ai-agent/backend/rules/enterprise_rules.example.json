@@ -1,0 +1,28 @@
+[
+  {
+    "id": "enterprise.no-generic-links",
+    "name": "Links avoid generic text",
+    "category": "enterprise content rules",
+    "wcag": ["2.4.4"],
+    "severity": "medium",
+    "type": "selector",
+    "selector": "a",
+    "fail_if_text_matches": "^(click here|read more|learn more|more)$",
+    "message": "Use link text that describes the destination or action.",
+    "enabled": true
+  },
+  {
+    "id": "enterprise.required-main",
+    "name": "Every page must include one main landmark",
+    "category": "enterprise landmarks",
+    "wcag": ["1.3.1", "2.4.1"],
+    "severity": "high",
+    "type": "selector_count",
+    "selector": "main, [role='main']",
+    "min": 1,
+    "max": 1,
+    "message": "Exactly one main landmark is required.",
+    "enabled": true
+  }
+]
+
